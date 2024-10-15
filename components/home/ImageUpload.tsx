@@ -1,0 +1,243 @@
+'use client';
+import { headerFont } from '@/data/config/fonts';
+import Image from '@/components/shared/Image';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Input } from '@/components/shared/ui/input';
+import { Button } from '@/components/shared/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/shared/ui/form';
+import { useRef, useState } from 'react';
+import AddImage from '../../assets/images/add_image.png';
+import { ImageViewer } from './ImageViewer';
+import axios from 'axios';
+import usePersistStore from 'helper/usePersistStore';
+import { useUploadStore, type ImageData } from 'store/UploadStore';
+
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const FormSchema = z.object({
+  file:
+    typeof window !== 'undefined' && window.FileList
+      ? z
+        .instanceof(FileList)
+        .optional()
+        .refine(
+          (files) => {
+            return !files || (files[0] && files[0].size <= MAX_FILE_SIZE);
+          },
+          {
+            message: 'File size should not exceed 5MB',
+          },
+        )
+      : z.any(),
+});
+
+export const ImageUpload = () => {
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const store = usePersistStore(useUploadStore, (state) => state);
+
+  if (processedImage !== null && isLoading === false && selectedImage !== null && originalImage !== null) {
+    const new_image: ImageData = {
+      selectedImage: originalImage,
+      returnedImage: processedImage,
+      error: '',
+      id: Date.now()
+    }
+
+    store?.addImageToList(new_image)
+    setProcessedImage(null)
+    setOriginalImage(null);
+    setSelectedImage(null)
+    setErrorMessage('')
+  }
+
+  // Function to handle the image upload and API call
+  const uploadImage = async (imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const response = await axios.post(
+        `/api/uploa`,
+        formData,
+      );
+      if (response.status === 201) {
+        setProcessedImage(response.data.outputMp);
+        setOriginalImage(response.data.fileName);
+      } else {
+        setErrorMessage('Upload failed');
+        throw new Error(response.data.message || 'Upload failed');
+      }
+    } catch (error) {
+      const errorMsg =
+        error.response?.data?.message ||
+        'Error uploading image. Please try again.';
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (files: FileList | null) => {
+    if (files && files[0]) {
+      const imageFile = files[0];
+      setSelectedImage(URL.createObjectURL(imageFile));
+      uploadImage(imageFile);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      handleFileChange(files);
+      form.setValue('file', files);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    store?.removeImageFromList(id);
+  };
+
+  const handleRetry = () => {
+    setSelectedImage(null);
+  }
+
+  return (
+    <div className="w-full flex flex-col items-center fancy-overlay space-y-8 pb-36">
+      <div className="flex justify-center items-center">
+        <h1
+          className={`${headerFont.className} text-5xl sm:text-6xl font-bold tracking-tight text-white text-center inline-flex`}
+        >
+          Upload an image
+        </h1>
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(() => { })} className="w-full p-10">
+          <div className="flex justify-center items-center">
+            <div
+              className={`bg-none border ${store?.imagesList.length === 0 ? 'p-12' : 'p-2'
+                } rounded-xl shadow-lg sm:w-96 max-w-xl relative flex flex-col justify-center items-center gap-6 ${isDragging ? 'border-blue-500' : 'border-gray-300'
+                }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {store?.imagesList.length === 0 && (
+                <Image
+                  src={AddImage}
+                  alt="add image icon"
+                  height={150}
+                  width={150}
+                  className="group-hover:animate-wiggle "
+                />
+              )}
+
+              <FormField
+                control={form.control}
+                name="file"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Button
+                        type="button"
+                        className="w-full py-7 text-white rounded-lg transition duration-300 ease-in-out font-semibold"
+                        onClick={handleButtonClick}
+                      >
+                        Upload
+                      </Button>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        className="hidden"
+                        accept=".jpg,.jpeg,.png,image/jpg,image/jpeg,image/png"
+                        ref={(e) => {
+                          fileInputRef.current = e;
+                          field.ref(e);
+                        }}
+                        onChange={(e) => {
+                          field.onChange(e.target.files);
+                          handleFileChange(e.target.files);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {store?.imagesList.length === 0 && (
+                <p className="text-center text-gray-400 mb-6">
+                  or drag and drop images
+                </p>
+              )}
+            </div>
+          </div>
+        </form>
+      </Form>
+      {
+        selectedImage && <ImageViewer
+          selectedImage={selectedImage}
+          returnedImage={processedImage}
+          isLoading={isLoading}
+          errorMessage={errorMessage}
+          firstPick={true}
+          handleRetry={handleRetry}
+        />
+      }
+      {store?.imagesList.map((data, index) => (
+        <div key={index} className="relative border">
+          <ImageViewer
+            selectedImage={data.selectedImage}
+            returnedImage={data.returnedImage}
+            isLoading={false}
+            errorMessage={data.error}
+          />
+          <button
+            className="absolute top-0 right-0 p-2 text-white"
+            onClick={() => handleDelete(data.id)}
+          >
+            X
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};

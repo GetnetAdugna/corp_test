@@ -1,0 +1,27 @@
+const metadata = {
+  title: 'Affordable, Scalable AI Services for You',
+  description: 'Create better content, affordably.',
+  domain: 'nichetech.ai',
+  logoTitle: 'Niche AI',
+  businessName: 'Niche AI ',
+  siteUrl: 'https://nichetech.ai',
+  siteRepo: '',
+  socialBanner: '',
+  supportEmail: 'support@nichetech.ai',
+  email: '',
+  twitter: '',
+  instagram: '',
+  tiktok: '',
+  github: '',
+  linkedin: '',
+  youtube: '',
+  facebook: '',
+  threads: '',
+  mastodon: '',
+  author: 'Niche AI',
+  language: 'en-us',
+  theme: 'dark',
+  locale: 'en-US',
+};
+
+module.exports = { metadata };
