@@ -12,6 +12,7 @@ import { AnalyticsWrapper } from '@/components/shared/Analytics';
 import Header from '@/components/shared/Header';
 import { Toaster } from "@/components/shared/ui/toaster"
 import SessionWrapper from '@/components/SessionWrapper';
+import ConfigureAmplify from '../utils/ConfigureAmplify';
 
 const displayFont = Inter({
   subsets: ['latin'],
@@ -137,6 +138,7 @@ export default function RootLayout({
         <ThemeProviders>
           <AnalyticsWrapper />
           <SessionWrapper>
+            <ConfigureAmplify />
             <div className="w-full flex flex-col justify-between items-center font-sans bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
               <SearchProvider>
                 <Header />

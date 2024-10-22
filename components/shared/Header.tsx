@@ -10,9 +10,15 @@ import Image from '@/components/shared/Image';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AuthButtons from './AuthButtons';
+import { GetAuthCurrentUserServer } from 'utils/utils';
+import {  } from 'next/server';
 
 const Header = async ({ className }: { className?: string }) => {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession()
+  // const { user } = useServerProps();
+  // const user = await GetAuthCurrentUserServer();
+
+  console.log("Logged in user: ", session)
   return (
     <header
       className={cn(
@@ -50,9 +56,9 @@ const Header = async ({ className }: { className?: string }) => {
         {/*<SearchButton />
         <ThemeSwitch />
         */}
-        <MobileNav isAuthenticated={session?.user ? true : false} />
+        {/* <MobileNav isAuthenticated={user?.signInDetails?.loginId ? true : false} /> */}
       </div>
-      <AuthButtons isAuthenticated={session?.user ? true : false} />
+      {/* <AuthButtons isAuthenticated={user?.signInDetails?.loginId ? true : false} /> */}
     </header >
   );
 };

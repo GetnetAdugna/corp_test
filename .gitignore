@@ -50,3 +50,8 @@ yarn-error.log*
 
 /public/test_images
 /public/output_images
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
