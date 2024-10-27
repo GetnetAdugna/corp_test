@@ -13,6 +13,7 @@ import Header from '@/components/shared/Header';
 import { Toaster } from "@/components/shared/ui/toaster"
 import SessionWrapper from '@/components/SessionWrapper';
 import ConfigureAmplify from '../utils/ConfigureAmplify';
+import { Auth } from '@/components/AuthClient';
 
 const displayFont = Inter({
   subsets: ['latin'],
@@ -138,16 +139,18 @@ export default function RootLayout({
         <ThemeProviders>
           <AnalyticsWrapper />
           <SessionWrapper>
-            <ConfigureAmplify />
-            <div className="w-full flex flex-col justify-between items-center font-sans bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
-              <SearchProvider>
-                <Header />
-                <main className="w-full flex flex-col items-center p-6 max-w-full container-wide">
-                  {children}
-                </main>
-                <Footer />
-              </SearchProvider>
-            </div>
+            {/* <ConfigureAmplify /> */}
+            <Auth>
+              <div className="w-full flex flex-col justify-between items-center font-sans bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
+                <SearchProvider>
+                  <Header />
+                  <main className="w-full flex flex-col items-center p-6 max-w-full container-wide">
+                    {children}
+                  </main>
+                  <Footer />
+                </SearchProvider>
+              </div>
+            </Auth>
           </SessionWrapper>
           <Toaster />
           {/*<Footer />*/}
