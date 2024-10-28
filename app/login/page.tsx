@@ -1,13 +1,21 @@
-import { SignInComponent } from "@/components/SignInComponent"
+"use client"
+
+import { SignInComponent } from "@/components/login/SignInComponent"
 import { redirect } from "next/navigation";
-import { getFetchUserAttr } from "utils/utils";
+import 'aws-amplify/auth/enable-oauth-listener';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
-export default async function SignInPage() {
-    const user = await getFetchUserAttr()
+export default function SignInPage() {
+    const { route, isPending } = useAuthenticator(context => [context.route]);
 
-    if (user) {
-        redirect('/')
+    if (route === 'authenticated') {
+        redirect('/home');
     }
+
+    if (isPending) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div>
             <SignInComponent />

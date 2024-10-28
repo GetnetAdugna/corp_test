@@ -15,12 +15,12 @@ export const auth = defineAuth({
       },
       callbackUrls: [
         'http://localhost:3000/home',
-        'https://main.d3qj1n073i5884.amplifyapp.com/home',
+        'https://main.d271n3w4oqhh52.amplifyapp.com/home',
         'https://f0af1a3e6483968cbb0d.auth.ap-northeast-3.amazoncognito.com/home',
       ],
       logoutUrls: [
         'http://localhost:3000/login',
-        'https://main.d3qj1n073i5884.amplifyapp.com/login',
+        'https://main.d271n3w4oqhh52.amplifyapp.com/login',
         'https://f0af1a3e6483968cbb0d.auth.ap-northeast-3.amazoncognito.com/login',
       ],
     },

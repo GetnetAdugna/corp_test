@@ -1,20 +1,16 @@
+"use client"
+
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/data/config/site.settings';
 import { headerNavLinks } from '@/data/config/headerNavLinks';
 import Link from './Link';
 import MobileNav from './MobileNav';
-// import ThemeSwitch from './ThemeSwitch';
-// import SearchButton from '../search/SearchButton';
 import ActiveLink from '@/components/shared/ActiveLink';
 import Image from '@/components/shared/Image';
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import AuthButtons from './AuthButtons';
-import { getAuthUser } from 'utils/utils';
 
-const Header = async ({ className }: { className?: string }) => {
-  const session = await getAuthUser()
-  // console.log("userSession: ", session);
+const Header = ({ className }: { className?: string }) => {
+
   return (
     <header
       className={cn(
@@ -52,9 +48,9 @@ const Header = async ({ className }: { className?: string }) => {
         {/*<SearchButton />
         <ThemeSwitch />
         */}
-        <MobileNav isAuthenticated={session ? true : false} />
+        <MobileNav />
       </div>
-      <AuthButtons isAuthenticated={session ? true : false} />
+      <AuthButtons />
     </header >
   );
 };

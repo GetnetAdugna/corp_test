@@ -3,14 +3,10 @@
 import { useState } from 'react';
 import Link from './Link';
 import { headerNavLinks } from '@/data/config/headerNavLinks';
-import { Button } from '@/components/shared/ui/button';
 import AuthButtons from './AuthButtons';
 
-type MobileNavProps = {
-  isAuthenticated: boolean;
-}
 
-const MobileNav = ({ isAuthenticated }: MobileNavProps) => {
+const MobileNav = () => {
   const [navShow, setNavShow] = useState(false);
 
   const onToggleNav = () => {
@@ -81,7 +77,7 @@ const MobileNav = ({ isAuthenticated }: MobileNavProps) => {
               </Link>
             </div>
           ))}
-          <AuthButtons isAuthenticated={isAuthenticated} onToggleNav={onToggleNav} isMobile={true} />
+          <AuthButtons onToggleNav={onToggleNav} isMobile={true} />
         </nav>
       </div>
     </>

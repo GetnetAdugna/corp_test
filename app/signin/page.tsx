@@ -1,4 +1,4 @@
-import { SignInComponent } from "@/components/SignInComponent"
+import { SignInComponent } from "@/components/login/SignInComponent"
 import { redirect } from "next/navigation";
 import { getFetchUserAttr } from "utils/utils";
 
