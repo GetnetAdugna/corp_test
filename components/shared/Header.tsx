@@ -13,7 +13,7 @@ import AuthButtons from './AuthButtons';
 import { getAuthUser } from 'utils/utils';
 
 const Header = async ({ className }: { className?: string }) => {
-  // const session = await getAuthUser()
+  const session = await getAuthUser()
   // console.log("userSession: ", session);
   return (
     <header
@@ -52,9 +52,9 @@ const Header = async ({ className }: { className?: string }) => {
         {/*<SearchButton />
         <ThemeSwitch />
         */}
-        {/* <MobileNav isAuthenticated={session ? true : false} /> */}
+        <MobileNav isAuthenticated={session ? true : false} />
       </div>
-      {/* <AuthButtons isAuthenticated={session ? true : false} /> */}
+      <AuthButtons isAuthenticated={session ? true : false} />
     </header >
   );
 };
