@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Buffer } from 'buffer';
 import path from 'path';
 import { promises as fsPromises } from 'fs';
+import { uploadData } from 'aws-amplify/storage';
 
 const IMAGE_UPLOAD_URL = process.env.IMAGE_UPLOAD_URL;
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
@@ -91,6 +92,14 @@ export async function POST(req: Request) {
     const fileName = `${Date.now()}_${imageFile.name}`;
     const filePath = path.join(publicDir, fileName);
 
+    // // upload image data to amplify storage(S3 storage)
+    // const amplify_storage_result = await uploadData({
+    //   path: `uploaded_images/${fileName}`,
+    //   data: imageFile,
+    // }).result;
+
+    // console.log('Amplify upload: ', amplify_storage_result);
+
     // Ensure the directory exists
     await fsPromises.mkdir(publicDir, { recursive: true });
 
@@ -99,7 +108,8 @@ export async function POST(req: Request) {
     await fsPromises.writeFile(filePath, Buffer.from(imageBuffer));
 
     // Now use the saved image for API call
-    const result = await uploadImageToApi(imageBuffer);
+    // const result = await uploadImageToApi(imageBuffer);
+    const result = {};
 
     return NextResponse.json({ ...result, fileName }, { status: 201 });
   } catch (error) {

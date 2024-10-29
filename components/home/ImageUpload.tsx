@@ -79,7 +79,7 @@ export const ImageUpload = () => {
 
     try {
       const response = await axios.post(
-        `/api/uploa`,
+        `/api/upload`,
         formData,
       );
       if (response.status === 201) {
