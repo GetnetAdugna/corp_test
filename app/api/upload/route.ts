@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios, { AxiosResponse } from 'axios';
 import { Buffer } from 'buffer';
-import path from 'path';
-import { promises as fsPromises } from 'fs';
 
 const IMAGE_UPLOAD_URL = process.env.IMAGE_UPLOAD_URL as string;
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY as string;
@@ -40,10 +38,8 @@ async function uploadImageToApi(
       const respJson = response.data;
       if (respJson.status === 'COMPLETED' && 'output' in respJson) {
         const images = respJson.output?.image;
-        console.log('api result:', images);
         if (images && images.length > 0) {
           const base64Images = Buffer.from(String(images), 'base64').toString('base64');
-          console.log('From Api: ', base64Images);
           return {
             message: 'Image uploaded and processed successfully',
             image: base64Images,
@@ -99,16 +95,4 @@ export async function POST(req: Request): Promise<NextResponse> {
       { status: 500 },
     );
   }
-}
-
-async function processImagesToFiles(images: string[]): Promise<Buffer[]> {
-  const buffers: Buffer[] = [];
-
-  for (const image of images) {
-    // Decode the base64 image string
-    const imageBuffer = Buffer.from(image, 'base64');
-    buffers.push(imageBuffer);
-  }
-
-  return buffers;
 }

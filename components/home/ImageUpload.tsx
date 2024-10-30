@@ -71,20 +71,20 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
   const store = usePersistStore(useUploadStore, (state) => state);
 
-  if (processedImage !== null && isLoading === false && selectedImage !== null && originalImage !== null) {
-    // const new_image: ImageData = {
-    //   selectedImage: originalImage,
-    //   returnedImage: processedImage,
-    //   error: '',
-    //   id: Date.now()
-    // }
+  // if (processedImage !== null && isLoading === false && selectedImage !== null && originalImage !== null) {
+  //   // const new_image: ImageData = {
+  //   //   selectedImage: originalImage,
+  //   //   returnedImage: processedImage,
+  //   //   error: '',
+  //   //   id: Date.now()
+  //   // }
 
-    // store?.addImageToList(new_image)
-    setProcessedImage(null)
-    setOriginalImage(null);
-    setSelectedImage(null)
-    setErrorMessage('')
-  }
+  //   // store?.addImageToList(new_image)
+  //   setProcessedImage(null)
+  //   setOriginalImage(null);
+  //   setSelectedImage(null)
+  //   setErrorMessage('')
+  // }
 
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
@@ -96,13 +96,10 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
     try {
       const response = await axios.post(
-        `/api/upload`,
+        `https://main.d271n3w4oqhh52.amplifyapp.com/api/upload`,
         formData,
       );
       if (response.status === 201) {
-        // setProcessedImage(response.data.outputMp);
-        // setOriginalImage(response.data.fileName);
-        console.log("Image Upload Result: " + response.data.image)
         createNewImageUploadData(imageFile, response.data.image);
       } else {
         setErrorMessage('Upload failed');
@@ -184,10 +181,6 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
       uploadImageToGenerateStorage(generatedImage, 'generated_images')
     ]);
 
-    console.log("AWS: ", uploadedImagePath, generatedImagePath)
-
-
-
     // Create the API record
     await client.models.UserImages.create({
       uploadedUrl: uploadedImagePath,
@@ -199,6 +192,8 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
       getUrl({ path: generatedImagePath })
     ]);
 
+    setProcessedImage(generatedSignedInURL.url.toString());
+    setOriginalImage(uploadedSignedInURL.url.toString());
 
     const newImageData: ImageData = {
       selectedImage: uploadedSignedInURL.url.toString(),
@@ -208,10 +203,11 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
     };
 
-    console.log("newImageData: ", newImageData)
-
-
     store?.addImageToList(newImageData)
+    setProcessedImage(null)
+    setOriginalImage(null);
+    setSelectedImage(null)
+    setErrorMessage('')
   }
 
   return (
