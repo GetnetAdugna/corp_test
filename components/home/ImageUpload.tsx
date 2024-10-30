@@ -70,7 +70,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const store = usePersistStore(useUploadStore, (state) => state);
-  
+
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
     const formData = new FormData();
@@ -80,6 +80,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     setErrorMessage('');
 
     try {
+      console.log("API Called")
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/upload`,
         formData,
@@ -93,6 +94,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
         throw new Error(response.data.message || 'Upload failed');
       }
     } catch (error) {
+      console.log("Unknown Error: ", error)
       const errorMsg =
         error.response?.data?.message ||
         'Error uploading image. Please try again.';
@@ -187,7 +189,6 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
       returnedImage: generatedSignedInURL.url.toString(),
       error: '',
       id: Date.now()
-
     };
 
     store?.addImageToList(newImageData)
