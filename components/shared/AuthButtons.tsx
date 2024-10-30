@@ -30,6 +30,7 @@ const AuthButtons = ({
                     onClick={
                         () => {
                             signOut()
+                            localStorage.clear();
                         }
                     }
                 >
@@ -54,6 +55,7 @@ const AuthButtons = ({
                     onClick={
                         () => {
                             signOut()
+                            localStorage.clear();
                         }
                     }
                 >

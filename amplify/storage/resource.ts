@@ -6,7 +6,6 @@ export const storage = defineStorage({
   access: (allow) => ({
     'media/{entity_id}/*': [
       allow.entity('identity').to(['read', 'write', 'delete']),
-      // additional actions such as "write" and "delete" can be specified depending on your use case
     ],
     'uploaded_images/{entity_id}/*': [
       allow.entity('identity').to(['read', 'write', 'delete']),

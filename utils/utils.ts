@@ -13,10 +13,8 @@ export const getAuthUser = async () => {
       nextServerContext: { cookies },
       operation: (contextSpec) => getCurrentUser(contextSpec),
     });
-    console.log("Current User: ", currentUser)
     return currentUser;
   } catch (err) {
-    // console.log(err);
     return false;
   }
 };
@@ -29,7 +27,6 @@ export const getFetchUserAttr = async () => {
     });
     return currentUser;
   } catch (err) {
-    // console.log(err);
     return false;
   }
 };
