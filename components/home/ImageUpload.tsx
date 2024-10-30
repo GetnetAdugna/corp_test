@@ -70,7 +70,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const store = usePersistStore(useUploadStore, (state) => state);
-
+  
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
     const formData = new FormData();
@@ -81,12 +81,14 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
     try {
       const response = await axios.post(
-        `https://main.d271n3w4oqhh52.amplifyapp.com/api/upload`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/upload`,
         formData,
       );
       if (response.status === 201) {
+        console.log("Image Upload successful")
         createNewImageUploadData(imageFile, response.data.image);
       } else {
+        console.log("Image Upload Failed")
         setErrorMessage('Upload failed');
         throw new Error(response.data.message || 'Upload failed');
       }

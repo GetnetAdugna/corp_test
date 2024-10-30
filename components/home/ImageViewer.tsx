@@ -23,8 +23,6 @@ export const ImageViewer = ({
   firstPick,
   handleRetry
 }: ImageViewerProps) => {
-  console.log("Selected Image: ", selectedImage)
-  console.log("returnedImage: ", returnedImage)
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
