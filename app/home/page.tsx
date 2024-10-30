@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import type { Schema } from "../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
@@ -59,7 +60,7 @@ export default function App() {
                 ))}
             </ul>
             <StorageManager
-                path="media/"
+                path={(identityId) => `media/${identityId}/`}
                 acceptedFileTypes={["image/*"]}
                 maxFileCount={1}
                 onUploadStart={({ key }) => {
