@@ -1,35 +1,52 @@
 import { NextResponse } from 'next/server';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Buffer } from 'buffer';
 import path from 'path';
 import { promises as fsPromises } from 'fs';
-import { uploadData } from 'aws-amplify/storage';
 
-const IMAGE_UPLOAD_URL = process.env.IMAGE_UPLOAD_URL;
-const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
+const IMAGE_UPLOAD_URL = process.env.IMAGE_UPLOAD_URL as string;
+const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY as string;
+
+export interface ApiResponse {
+  status: string;
+  output?: {
+    image: string[];
+  };
+}
+interface UploadResult {
+  message: string;
+  image?: string;
+}
 
 // Function to upload image to the API
-async function uploadImageToApi(imageBuffer: ArrayBuffer) {
+async function uploadImageToApi(
+  imageBuffer: ArrayBuffer,
+): Promise<UploadResult> {
   const imageContent = Buffer.from(imageBuffer).toString('base64');
   const payload = { input: { image_file: [imageContent] } };
 
   try {
-    const response = await axios.post(`${IMAGE_UPLOAD_URL}`, payload, {
-      headers: {
-        Authorization: `Bearer ${RUNPOD_API_KEY}`,
+    const response: AxiosResponse<ApiResponse> = await axios.post(
+      IMAGE_UPLOAD_URL,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${RUNPOD_API_KEY}`,
+        },
       },
-    });
+    );
 
     if (response.status === 200) {
       const respJson = response.data;
       if (respJson.status === 'COMPLETED' && 'output' in respJson) {
-        const image = respJson.output.image;
-        if (image && image.length > 0) {
-          // Save the returned image to the output_images folder
-          const outputMp = await processAndSaveImage(image, 'output_images');
+        const images = respJson.output?.image;
+        console.log('api result:', images);
+        if (images && images.length > 0) {
+          const base64Images = Buffer.from(String(images), 'base64').toString('base64');
+          console.log('From Api: ', base64Images);
           return {
             message: 'Image uploaded and processed successfully',
-            outputMp,
+            image: base64Images,
           };
         } else {
           return { message: 'Error: No image data in the response' };
@@ -43,32 +60,12 @@ async function uploadImageToApi(imageBuffer: ArrayBuffer) {
       return { message: `Error: ${response.status} ${response.data}` };
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return { message: 'Error uploading image' };
   }
 }
 
-// Function to process and save the image
-async function processAndSaveImage(image: string, folder: string) {
-  // Decode the base64 image string
-  const imageBuffer = Buffer.from(image, 'base64');
-
-  // Set the path for saving the image
-  const outputDir = path.join(process.cwd(), 'public', folder);
-  const fileName = `${Date.now()}_output_image.png`; // Use timestamp for unique filenames
-  const filePath = path.join(outputDir, fileName);
-
-  // Ensure the output folder exists
-  await fsPromises.mkdir(outputDir, { recursive: true });
-
-  // Save the image file
-  await fsPromises.writeFile(filePath, imageBuffer);
-
-  // Return the path of the saved image
-  return fileName;
-}
-
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   try {
     const formData = await req.formData();
     const imageFile = formData.get('image');
@@ -87,37 +84,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // Save the image to the public/test_images folder
-    const publicDir = path.join(process.cwd(), 'public', 'test_images');
-    const fileName = `${Date.now()}_${imageFile.name}`;
-    const filePath = path.join(publicDir, fileName);
-
-    // // upload image data to amplify storage(S3 storage)
-    // const amplify_storage_result = await uploadData({
-    //   path: `uploaded_images/${fileName}`,
-    //   data: imageFile,
-    // }).result;
-
-    // console.log('Amplify upload: ', amplify_storage_result);
-
-    // Ensure the directory exists
-    await fsPromises.mkdir(publicDir, { recursive: true });
-
     // Convert File to Buffer and save the image to the public folder
     const imageBuffer = await imageFile.arrayBuffer();
-    await fsPromises.writeFile(filePath, Buffer.from(imageBuffer));
 
     // Now use the saved image for API call
-    // const result = await uploadImageToApi(imageBuffer);
-    const result = {};
+    const result: UploadResult = await uploadImageToApi(imageBuffer);
 
-    return NextResponse.json({ ...result, fileName }, { status: 201 });
+    return NextResponse.json({ ...result }, { status: 201 });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return NextResponse.json(
       { message: 'Error uploading image' },
       { status: 500 },
     );
   }
+}
+
+async function processImagesToFiles(images: string[]): Promise<Buffer[]> {
+  const buffers: Buffer[] = [];
+
+  for (const image of images) {
+    // Decode the base64 image string
+    const imageBuffer = Buffer.from(image, 'base64');
+    buffers.push(imageBuffer);
+  }
+
+  return buffers;
 }

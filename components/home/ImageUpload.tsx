@@ -20,7 +20,24 @@ import { ImageViewer } from './ImageViewer';
 import axios from 'axios';
 import usePersistStore from 'helper/usePersistStore';
 import { useUploadStore, type ImageData } from 'store/UploadStore';
+import {
+  type WithAuthenticatorProps,
+  withAuthenticator,
+} from "@aws-amplify/ui-react";
+import { Amplify } from "aws-amplify";
+import outputs from "../../amplify_outputs.json";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../../amplify/data/resource";
+import { uploadData, getUrl, remove } from "aws-amplify/storage";
 
+Amplify.configure(outputs);
+
+// Generating the client
+const client = generateClient<Schema>({
+  authMode: "userPool",
+});
+
+type UserImages = Schema["UserImages"]["type"];
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const FormSchema = z.object({
@@ -40,7 +57,7 @@ const FormSchema = z.object({
       : z.any(),
 });
 
-export const ImageUpload = () => {
+const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -55,14 +72,14 @@ export const ImageUpload = () => {
   const store = usePersistStore(useUploadStore, (state) => state);
 
   if (processedImage !== null && isLoading === false && selectedImage !== null && originalImage !== null) {
-    const new_image: ImageData = {
-      selectedImage: originalImage,
-      returnedImage: processedImage,
-      error: '',
-      id: Date.now()
-    }
+    // const new_image: ImageData = {
+    //   selectedImage: originalImage,
+    //   returnedImage: processedImage,
+    //   error: '',
+    //   id: Date.now()
+    // }
 
-    store?.addImageToList(new_image)
+    // store?.addImageToList(new_image)
     setProcessedImage(null)
     setOriginalImage(null);
     setSelectedImage(null)
@@ -83,8 +100,10 @@ export const ImageUpload = () => {
         formData,
       );
       if (response.status === 201) {
-        setProcessedImage(response.data.outputMp);
-        setOriginalImage(response.data.fileName);
+        // setProcessedImage(response.data.outputMp);
+        // setOriginalImage(response.data.fileName);
+        console.log("Image Upload Result: " + response.data.image)
+        createNewImageUploadData(imageFile, response.data.image);
       } else {
         setErrorMessage('Upload failed');
         throw new Error(response.data.message || 'Upload failed');
@@ -138,6 +157,61 @@ export const ImageUpload = () => {
 
   const handleRetry = () => {
     setSelectedImage(null);
+  }
+
+  const createNewImageUploadData = async (uploadedImage: File, generatedImage: string) => {
+    const uploadImageToStorage = async (image: File | string, folder: string) => {
+      const result = await uploadData({
+        path: ({ identityId }) => `${folder}/${identityId}/${typeof image === 'string' ? image : image.name}`,
+        data: image,
+      }).result;
+      return result?.path;
+    };
+    const uploadImageToGenerateStorage = async (image: string, folder: string) => {
+      // Convert base64 string to a Blob or Buffer
+      const buffer = Buffer.from(image, 'base64');
+      const fileName = `${Date.now()}_image.png`; // You can customize the file name as needed
+
+      const result = await uploadData({
+        path: ({ identityId }) => `${folder}/${identityId}/${fileName}`,
+        data: buffer, // Use the buffer directly
+      }).result;
+      return result?.path;
+    };
+
+    const [uploadedImagePath, generatedImagePath] = await Promise.all([
+      uploadImageToStorage(uploadedImage, 'uploaded_images'),
+      uploadImageToGenerateStorage(generatedImage, 'generated_images')
+    ]);
+
+    console.log("AWS: ", uploadedImagePath, generatedImagePath)
+
+
+
+    // Create the API record
+    await client.models.UserImages.create({
+      uploadedUrl: uploadedImagePath,
+      generatedUrl: generatedImagePath
+    });
+
+    const [uploadedSignedInURL, generatedSignedInURL] = await Promise.all([
+      getUrl({ path: uploadedImagePath }),
+      getUrl({ path: generatedImagePath })
+    ]);
+
+
+    const newImageData: ImageData = {
+      selectedImage: uploadedSignedInURL.url.toString(),
+      returnedImage: generatedSignedInURL.url.toString(),
+      error: '',
+      id: Date.now()
+
+    };
+
+    console.log("newImageData: ", newImageData)
+
+
+    store?.addImageToList(newImageData)
   }
 
   return (
@@ -241,3 +315,6 @@ export const ImageUpload = () => {
     </div>
   );
 };
+
+
+export default withAuthenticator(ImageUpload)

@@ -65,6 +65,9 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     images: {
+      domains: [
+        'amplify-nicheaiservices-eyob-nicheaibucketb7852cc1-qd7tp7rvkdux.s3.ap-northeast-3.amazonaws.com',
+      ],
       remotePatterns: [
         {
           protocol: 'https',

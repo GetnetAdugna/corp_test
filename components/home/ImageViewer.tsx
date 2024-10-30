@@ -23,6 +23,9 @@ export const ImageViewer = ({
   firstPick,
   handleRetry
 }: ImageViewerProps) => {
+  console.log("Selected Image: ", selectedImage)
+  console.log("returnedImage: ", returnedImage)
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
   const [selectedImageInfo, setSelectedImageInfo] = useState<{
@@ -37,7 +40,7 @@ export const ImageViewer = ({
   } | null>(null);
   const [retry, setRetry] = useState(false);
 
-  const imageLocation = `${firstPick ? `${selectedImage}` : `/test_images/${selectedImage}`}`;
+  const imageLocation = `${firstPick ? `${selectedImage}` : `${selectedImage}`}`;
 
   const openModal = (selectedImage: string) => {
     setModalImageSrc(selectedImage);
@@ -76,7 +79,7 @@ export const ImageViewer = ({
 
   useEffect(() => {
     if (returnedImage) {
-      getImageDetails(`/output_images/${returnedImage} `, setReturnedImageInfo);
+      getImageDetails(`${returnedImage} `, setReturnedImageInfo);
     }
   }, [returnedImage, retry]);
 
@@ -106,12 +109,12 @@ export const ImageViewer = ({
           ) : !isLoading && !errorMessage ? (
             <ImageCard
               title="After"
-              imageSrc={`/output_images/${returnedImage} `}
+              imageSrc={`${returnedImage}`}
               imageInfo={returnedImageInfo}
-              onClick={() => openModal(`/output_images/${returnedImage} `)}
+              onClick={() => openModal(`${returnedImage} `)}
               onDownload={() =>
                 handleDownload(
-                  `/output_images/${returnedImage}`,
+                  `${returnedImage}`,
                   'processed_image.png',
                 )
               }
