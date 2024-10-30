@@ -71,21 +71,6 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
   const store = usePersistStore(useUploadStore, (state) => state);
 
-  // if (processedImage !== null && isLoading === false && selectedImage !== null && originalImage !== null) {
-  //   // const new_image: ImageData = {
-  //   //   selectedImage: originalImage,
-  //   //   returnedImage: processedImage,
-  //   //   error: '',
-  //   //   id: Date.now()
-  //   // }
-
-  //   // store?.addImageToList(new_image)
-  //   setProcessedImage(null)
-  //   setOriginalImage(null);
-  //   setSelectedImage(null)
-  //   setErrorMessage('')
-  // }
-
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
     const formData = new FormData();
