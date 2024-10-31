@@ -156,11 +156,11 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     const uploadImageToGenerateStorage = async (image: string, folder: string) => {
       // Convert base64 string to a Blob or Buffer
       const buffer = Buffer.from(image, 'base64');
-      const fileName = `${Date.now()}_image.png`; // You can customize the file name as needed
+      const fileName = `${Date.now()}_image.png`;
 
       const result = await uploadData({
         path: ({ identityId }) => `${folder}/${identityId}/${fileName}`,
-        data: buffer, // Use the buffer directly
+        data: buffer, 
       }).result;
       return result?.path;
     };
@@ -192,10 +192,10 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     };
 
     store?.addImageToList(newImageData)
-    setProcessedImage(null)
-    setOriginalImage(null);
-    setSelectedImage(null)
-    setErrorMessage('')
+    // setProcessedImage(null)
+    // setOriginalImage(null);
+    // setSelectedImage(null)
+    // setErrorMessage('')
   }
 
   return (
