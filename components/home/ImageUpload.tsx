@@ -28,7 +28,7 @@ import { Amplify } from "aws-amplify";
 import outputs from "../../amplify_outputs.json";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
-import { uploadData, getUrl, remove } from "aws-amplify/storage";
+import { uploadData, getUrl } from "aws-amplify/storage";
 
 Amplify.configure(outputs);
 
@@ -65,7 +65,6 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
-  const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -89,7 +88,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
         console.log("Image Upload successful")
         createNewImageUploadData(imageFile, response.data.image);
       } else {
-        console.log("Image Upload Failed")
+        console.log("API Image Upload Failed")
         setErrorMessage('Upload failed');
         throw new Error(response.data.message || 'Upload failed');
       }
@@ -160,7 +159,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
       const result = await uploadData({
         path: ({ identityId }) => `${folder}/${identityId}/${fileName}`,
-        data: buffer, 
+        data: buffer,
       }).result;
       return result?.path;
     };
@@ -181,8 +180,10 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
       getUrl({ path: generatedImagePath })
     ]);
 
+    console.log("Uploaded normal image URL: ", uploadedSignedInURL.url.toString())
+    console.log("Uploaded generated image URL: ", generatedSignedInURL.url.toString())
     setProcessedImage(generatedSignedInURL.url.toString());
-    setOriginalImage(uploadedSignedInURL.url.toString());
+    setSelectedImage(uploadedSignedInURL.url.toString());
 
     const newImageData: ImageData = {
       selectedImage: uploadedSignedInURL.url.toString(),
@@ -192,10 +193,9 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     };
 
     store?.addImageToList(newImageData)
-    // setProcessedImage(null)
-    // setOriginalImage(null);
-    // setSelectedImage(null)
-    // setErrorMessage('')
+    setProcessedImage(null);
+    setSelectedImage(null);
+    setErrorMessage('');
   }
 
   return (

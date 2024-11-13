@@ -104,7 +104,7 @@ export const ImageViewer = ({
             <div className="flex flex-col justify-center items-center text-center ml-36">
               <Spinner />
             </div>
-          ) : !isLoading && !errorMessage ? (
+          ) : !isLoading && !errorMessage && returnedImage ? (
             <ImageCard
               title="After"
               imageSrc={`${returnedImage}`}
