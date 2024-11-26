@@ -81,7 +81,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     try {
       console.log("API Called")
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/upload`,
+        `/api/upload`,
         formData,
       );
       if (response.status === 201) {
