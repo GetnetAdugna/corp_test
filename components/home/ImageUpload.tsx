@@ -79,6 +79,15 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
     setErrorMessage('');
 
     try {
+      console.log("Upload Image to storage: ")
+      const uploadImageToStorage = async (image: File | string, folder: string) => {
+        const result = await uploadData({
+          path: ({ identityId }) => `${folder}/${identityId}/${typeof image === 'string' ? image : image.name}`,
+          data: image,
+        }).result;
+        return result?.path;
+      };
+      console.log("Uploaded Image result: ", uploadImageToStorage)
       console.log("API Called")
       const response = await axios.post(
         `/api/upload`,
