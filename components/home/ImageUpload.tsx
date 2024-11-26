@@ -87,7 +87,8 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
         }).result;
         return result?.path;
       };
-      console.log("Uploaded Image result: ", uploadImageToStorage)
+      const uploadedImage = await uploadImageToStorage(imageFile, 'uploaded_images')
+      console.log("Uploaded Image result: ", uploadedImage)
       console.log("API Called")
       const response = await axios.post(
         `/api/upload`,
