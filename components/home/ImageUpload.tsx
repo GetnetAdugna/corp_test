@@ -29,6 +29,7 @@ import outputs from "../../amplify_outputs.json";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
 import { uploadData, getUrl } from "aws-amplify/storage";
+import { uploadImageToApi } from './api';
 
 Amplify.configure(outputs);
 
@@ -72,46 +73,29 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
     setIsLoading(true);
     setErrorMessage('');
 
     try {
-      console.log("Upload Image to storage: ")
-      const uploadImageToStorage = async (image: File | string, folder: string) => {
-        const result = await uploadData({
-          path: ({ identityId }) => `${folder}/${identityId}/${typeof image === 'string' ? image : image.name}`,
-          data: image,
-        }).result;
-        return result?.path;
-      };
-      const uploadedImage = await uploadImageToStorage(imageFile, 'uploaded_images')
-      console.log("Uploaded Image result: ", uploadedImage)
-      console.log("API Called")
-      const response = await axios.post(
-        `/api/upload`,
-        formData,
-      );
-      if (response.status === 201) {
-        console.log("Image Upload successful")
-        createNewImageUploadData(imageFile, response.data.image);
+      console.log('API Called');
+      const response = await uploadImageToApi(imageFile);
+
+      if (response.image) {
+        console.log('Image Upload successful');
+        // Call your function with the original and processed images
+        createNewImageUploadData(imageFile, response.image);
       } else {
-        console.log("API Image Upload Failed")
-        setErrorMessage('Upload failed');
-        throw new Error(response.data.message || 'Upload failed');
+        console.error('API Image Upload Failed:', response.message);
+        setErrorMessage(response.message || 'Upload failed');
       }
     } catch (error) {
-      console.log("Unknown Error: ", error)
-      const errorMsg =
-        error.response?.data?.message ||
-        'Error uploading image. Please try again.';
-      setErrorMessage(errorMsg);
+      console.error('Unknown Error:', error);
+      setErrorMessage('Error uploading image. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
