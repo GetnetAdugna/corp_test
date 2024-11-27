@@ -73,7 +73,7 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/apis/get-current-user');
+        const response = await fetch('/api/user');
         if (response.ok) {
           const userData = await response.json();
           setAuthenticated(userData);
