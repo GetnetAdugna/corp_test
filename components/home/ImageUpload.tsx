@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shared/ui/form';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import AddImage from '../../assets/images/add_image.png';
 import { ImageViewer } from './ImageViewer';
 import axios from 'axios';
@@ -68,6 +68,29 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/apis/get-current-user');
+        if (response.ok) {
+          const userData = await response.json();
+          setAuthenticated(userData);
+        } else {
+          console.error('Failed to fetch user data:', response.status);
+          setAuthenticated(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setAuthenticated(null);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  console.log("Auth User: ", authenticated)
 
   const store = usePersistStore(useUploadStore, (state) => state);
 
