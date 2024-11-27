@@ -30,7 +30,7 @@ import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
 import { uploadData, getUrl } from "aws-amplify/storage";
 
-Amplify.configure(outputs);
+Amplify.configure(outputs, { ssr: true });
 
 // Generating the client
 const client = generateClient<Schema>({
