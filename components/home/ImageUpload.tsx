@@ -73,9 +73,9 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/user');
-        if (response.ok) {
-          const userData = await response.json();
+        const response = await axios.get('/api/user');
+        if (response.status === 200) {
+          const userData = await response.data;
           setAuthenticated(userData);
         } else {
           console.error('Failed to fetch user data:', response.status);
