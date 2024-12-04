@@ -25,11 +25,11 @@ async function uploadImageToApi(
 
   try {
     const response: AxiosResponse<ApiResponse> = await axios.post(
-      IMAGE_UPLOAD_URL,
+      "https://api.runpod.ai/v2/52tutx1wrdld3f/runsync",
       payload,
       {
         headers: {
-          Authorization: `Bearer ${RUNPOD_API_KEY}`,
+          Authorization: `Bearer 13HZCPRYLLZFRQCQRQLK3V01UUCJQ700TUINM703`,
         },
       },
     );

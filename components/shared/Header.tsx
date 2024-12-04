@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/data/config/site.settings';
 import { headerNavLinks } from '@/data/config/headerNavLinks';
@@ -8,9 +6,11 @@ import MobileNav from './MobileNav';
 import ActiveLink from '@/components/shared/ActiveLink';
 import Image from '@/components/shared/Image';
 import AuthButtons from './AuthButtons';
+import { isAuthenticated } from 'utils/utils';
 
-const Header = ({ className }: { className?: string }) => {
-
+const Header = async ({ className }: { className?: string }) => {
+  const isUserAuthenticated = await isAuthenticated();
+  console.log('isUserAuthenticated Header', isUserAuthenticated);
   return (
     <header
       className={cn(
@@ -50,7 +50,7 @@ const Header = ({ className }: { className?: string }) => {
         */}
         <MobileNav />
       </div>
-      <AuthButtons />
+      <AuthButtons isUserAuthenticated={isUserAuthenticated} />
     </header >
   );
 };

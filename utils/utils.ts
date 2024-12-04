@@ -30,3 +30,16 @@ export const getFetchUserAttr = async () => {
     return false;
   }
 };
+
+export const isAuthenticated = async () =>
+  await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    async operation(contextSpec) {
+      try {
+        const user = await getCurrentUser(contextSpec);
+        return !!user;
+      } catch (error) {
+        return false;
+      }
+    },
+  });

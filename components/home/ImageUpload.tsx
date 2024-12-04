@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shared/ui/form';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import AddImage from '../../assets/images/add_image.png';
 import { ImageViewer } from './ImageViewer';
 import axios from 'axios';
@@ -29,9 +29,8 @@ import outputs from "../../amplify_outputs.json";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
 import { uploadData, getUrl } from "aws-amplify/storage";
-import { uploadImageToApi } from './api';
 
-Amplify.configure(outputs);
+Amplify.configure(outputs, { ssr: true });
 
 // Generating the client
 const client = generateClient<Schema>({
@@ -68,64 +67,48 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get('/api/user');
-        if (response.status === 200) {
-          const userData = await response.data;
-          setAuthenticated(userData);
-        } else {
-          console.error('Failed to fetch user data:', response.status);
-          setAuthenticated(null);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setAuthenticated(null);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  console.log("Auth User: ", authenticated)
 
   const store = usePersistStore(useUploadStore, (state) => state);
 
   // Function to handle the image upload and API call
   const uploadImage = async (imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
     setIsLoading(true);
     setErrorMessage('');
 
     try {
-      console.log('API Called');
-      const response = await uploadImageToApi(imageFile);
-
-      if (response.image) {
-        console.log('Image Upload successful');
-        // Call your function with the original and processed images
-        createNewImageUploadData(imageFile, response.image);
+      console.log("API Called")
+      const response = await axios.post(
+        '/api/upload',
+        formData,
+      );
+      if (response.status === 201) {
+        console.log("Image Upload successful")
+        createNewImageUploadData(imageFile, response.data.image);
       } else {
-        console.error('API Image Upload Failed:', response.message);
-        setErrorMessage(response.message || 'Upload failed');
+        console.log("API Image Upload Failed")
+        setErrorMessage('Upload failed');
+        throw new Error(response.data.message || 'Upload failed');
       }
     } catch (error) {
-      console.error('Unknown Error:', error);
-      setErrorMessage('Error uploading image. Please try again.');
+      console.log("Unknown Error: ", error)
+      const errorMsg =
+        error.response?.data?.message ||
+        'Error uploading image. Please try again.';
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-
+  
   const handleFileChange = (files: FileList | null) => {
     if (files && files[0]) {
       const imageFile = files[0];
@@ -318,4 +301,4 @@ const ImageUpload = ({ user }: WithAuthenticatorProps) => {
 };
 
 
-export default withAuthenticator(ImageUpload)
+export default ImageUpload

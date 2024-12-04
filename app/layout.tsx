@@ -139,18 +139,17 @@ export default function RootLayout({
         <ThemeProviders>
           <AnalyticsWrapper />
           <SessionWrapper>
-            {/* <ConfigureAmplify /> */}
-            <Auth>
-              <div className="w-full flex flex-col justify-between items-center font-sans bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
-                <SearchProvider>
-                  <Header />
+            <div className="w-full flex flex-col justify-between items-center font-sans bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
+              <SearchProvider>
+                <Header />
+                <Auth>
                   <main className="w-full flex flex-col items-center p-6 max-w-full container-wide">
                     {children}
                   </main>
-                  <Footer />
-                </SearchProvider>
-              </div>
-            </Auth>
+                </Auth>
+                <Footer />
+              </SearchProvider>
+            </div>
           </SessionWrapper>
           <Toaster />
           {/*<Footer />*/}

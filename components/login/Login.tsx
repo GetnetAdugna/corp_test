@@ -16,8 +16,9 @@ import {
 import Link from "next/link";
 import { useRouter } from 'next/navigation'
 import GoogleLogo from "../../assets/images/google_logo.svg";
-import { signIn } from "next-auth/react"
+// import { signIn } from "next-auth/react"
 import { useToast } from '@/components/shared/ui/use-toast';
+import { signIn, signInWithRedirect } from "aws-amplify/auth"
 
 const FormSchema = z.object({
   email: z.string().min(2, {
@@ -47,29 +48,45 @@ export const Login = () => {
   })
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const signInData = await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false
-    });
+    // const signInData = await signIn('credentials', {
+    //   email: data.email,
+    //   password: data.password,
+    //   redirect: false
+    // });
+    try {
+      const { isSignedIn } = await signIn({
+        username: data.email,
+        password: data.password,
+      })
 
-    if (signInData?.error) {
-      console.log(signInData.error)
+      console.log("Sign in result: ", isSignedIn)
+
+      if (isSignedIn) {
+        router.push('/home')
+      } else {
+        // got to the home page
+        toast({
+          variant: 'destructive',
+          title: 'Something went wrong.',
+        });
+      }
+    } catch (error) {
       toast({
-        variant: 'destructive',
-        title: 'Something went wrong.',
-        description: signInData.error,
-      });
-    } else {
-      // got to the home page
-      router.push('/home')
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your login request.",
+      })
     }
+
   }
 
-  const loginWithGoogle = () => signIn("google", {
-    callbackUrl: "http://localhost:3000/home"
-  });
+  // const loginWithGoogle = () => signIn("google", {
+  //   callbackUrl: "http://localhost:3000/home"
+  // });
 
+  const loginWithGoogle = async () => {
+    await signInWithRedirect({ provider: "Google" })
+  }
 
   return (
     <Form {...form}>

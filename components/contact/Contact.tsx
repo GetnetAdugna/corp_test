@@ -14,6 +14,8 @@ import {
   FormMessage,
 } from "@/components/shared/ui/form"
 import Link from "next/link";
+import { signUp } from "aws-amplify/auth"
+import { redirect, useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   firstName: z.string().min(2, {
@@ -36,6 +38,8 @@ const FormSchema = z.object({
 })
 
 export const Contact = () => {
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -46,16 +50,46 @@ export const Contact = () => {
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-primary">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const { nextStep, isSignUpComplete, userId } = await signUp({
+        username: data.email,
+        password: data.password,
+        options: {
+          userAttributes: {
+            email: data.email
+          }
+        }
+      });
+
+      console.log("Sign up", nextStep)
+      console.log("Sign up", isSignUpComplete)
+      console.log("Sign up", userId)
+
+      if (userId) {
+        toast({
+          title: "Success!",
+          description: "Check your email for a verification code...",
+        })
+        router.push(`/validate/${encodeURIComponent(data.email)}`);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a problem with your registration.",
+        })
+      }
+
+    } catch (err) {
+      console.log(err)
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your registration.",
+      })
+    }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
