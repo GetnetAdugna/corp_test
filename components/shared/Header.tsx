@@ -48,7 +48,7 @@ const Header = async ({ className }: { className?: string }) => {
         {/*<SearchButton />
         <ThemeSwitch />
         */}
-        <MobileNav />
+        <MobileNav isUserAuthenticated={isUserAuthenticated} />
       </div>
       <AuthButtons isUserAuthenticated={isUserAuthenticated} />
     </header >

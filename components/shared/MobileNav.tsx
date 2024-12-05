@@ -5,8 +5,10 @@ import Link from './Link';
 import { headerNavLinks } from '@/data/config/headerNavLinks';
 import AuthButtons from './AuthButtons';
 
-
-const MobileNav = () => {
+interface IMobileNavProps {
+  isUserAuthenticated: boolean;
+}
+const MobileNav = ({isUserAuthenticated}: IMobileNavProps) => {
   const [navShow, setNavShow] = useState(false);
 
   const onToggleNav = () => {
@@ -77,7 +79,7 @@ const MobileNav = () => {
               </Link>
             </div>
           ))}
-          <AuthButtons onToggleNav={onToggleNav} isMobile={true} />
+          <AuthButtons onToggleNav={onToggleNav} isMobile={true} isUserAuthenticated={isUserAuthenticated} />
         </nav>
       </div>
     </>
