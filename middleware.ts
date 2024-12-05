@@ -11,19 +11,38 @@ const publicRoutes: string[] = [
   '/products',
   '/terms',
   '/about',
-  '/login'
+  '/login',
+  '/validate',
+  '/auth/callback',
+  '/oauth2/idpresponse',
+  '/api/auth/session'
 ];
+
+const protectedRoutes: string[] = ['/home'];
 export async function middleware(request: NextRequest) {
-  const currentPath = request.nextUrl.pathname;
-  console.log('Middleware current path: ', currentPath);
+  // const currentPath = request.nextUrl.pathname;
+  // console.log('Middleware current path: ', currentPath);
+  // const response = NextResponse.next();
+  const url = request.nextUrl;
+  const currentPath = url.pathname;
+  const queryParams = url.searchParams;
   const response = NextResponse.next();
+
+  if (currentPath === '/home' && queryParams.has('code') && queryParams.has('state')) {
+    console.log('OAuth callback detected, allowing access.');
+    return response;
+  }
+
+  if (publicRoutes.includes(currentPath)) {
+    return response;
+  }
 
   const authenticated = await runWithAmplifyServerContext({
     nextServerContext: { request, response },
     operation: async (contextSpec) => {
       try {
         const session = await fetchAuthSession(contextSpec, {});
-        console.log('Middleware: ', session.userSub);
+        console.log('Middleware Session: ', session.userSub);
         return session.tokens !== undefined;
       } catch (error) {
         console.log(error);
@@ -31,6 +50,8 @@ export async function middleware(request: NextRequest) {
       }
     },
   });
+
+  console.log('Middleware isAuthenticated: ', authenticated);
 
   if (authenticated && publicRoutes.includes(currentPath)) {
     return NextResponse.redirect(new URL('/home', request.url));
@@ -40,15 +61,17 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (authenticated) {
-    return response;
+  if (!authenticated && protectedRoutes.includes(currentPath)) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  return NextResponse.redirect(new URL('/login', request.url));
+  return response;
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|login).*)',
+    ...publicRoutes,
+    ...protectedRoutes,
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

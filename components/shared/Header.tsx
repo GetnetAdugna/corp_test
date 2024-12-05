@@ -10,7 +10,7 @@ import { isAuthenticated } from 'utils/utils';
 
 const Header = async ({ className }: { className?: string }) => {
   const isUserAuthenticated = await isAuthenticated();
-  console.log('isUserAuthenticated Header', isUserAuthenticated);
+  // console.log('isUserAuthenticated Header', isUserAuthenticated);
   return (
     <header
       className={cn(
