@@ -8,6 +8,7 @@ import { signOut } from '@aws-amplify/auth';
 import { fetchAuthSession } from '@aws-amplify/auth';
 import { useEffect, useState, useTransition } from 'react';
 import { Hub } from 'aws-amplify/utils';
+
 interface AuthButtonsProps {
     isMobile?: boolean;
     onToggleNav?: () => void;
@@ -29,7 +30,7 @@ const AuthButtons = ({
             switch (data.payload.event) {
                 case "signedIn":
                     setAuthCheck(true);
-                    startTransition(() => router.push("/home"));
+                    // startTransition(() => router.push("/home"));
                     startTransition(() => router.refresh());
                     break;
                 case "signedOut":

@@ -59,9 +59,11 @@ const FormSchema = z.object({
 });
 
 const ImageUploadClient = ({ user }: WithAuthenticatorProps) => {
+  
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -146,6 +148,7 @@ const ImageUploadClient = ({ user }: WithAuthenticatorProps) => {
       }).result;
       return result?.path;
     };
+    
     const uploadImageToGenerateStorage = async (image: string, folder: string) => {
       // Convert base64 string to a Blob or Buffer
       const buffer = Buffer.from(image, 'base64');
@@ -295,4 +298,4 @@ const ImageUploadClient = ({ user }: WithAuthenticatorProps) => {
 };
 
 
-export default withAuthenticator(ImageUploadClient)
+export default ImageUploadClient

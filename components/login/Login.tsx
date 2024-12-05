@@ -18,7 +18,11 @@ import { useRouter } from 'next/navigation'
 import GoogleLogo from "../../assets/images/google_logo.svg";
 // import { signIn } from "next-auth/react"
 import { useToast } from '@/components/shared/ui/use-toast';
-import { signIn, signInWithRedirect } from "aws-amplify/auth"
+import { AuthUser, getCurrentUser, signIn, signInWithRedirect } from "aws-amplify/auth"
+import { Hub } from "aws-amplify/utils";
+import { useState, useEffect } from "react";
+import usePersistStore from "helper/usePersistStore";
+import { useAuthStore } from "store/AuthStore";
 
 const FormSchema = z.object({
   email: z.string().min(2, {
@@ -38,7 +42,6 @@ export const Login = () => {
   const router = useRouter()
   const { toast } = useToast();
 
-
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -47,12 +50,44 @@ export const Login = () => {
     },
   })
 
+  const store = usePersistStore(useAuthStore, (state) => state);
+
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [error, setError] = useState<unknown>(null);
+
+  console.log("Login page user: ", user)
+
+  useEffect(() => {
+    const unsubscribe = Hub.listen("auth", ({ payload }) => {
+      console.log("Login page Hub: ", payload);
+      switch (payload.event) {
+        case "signInWithRedirect":
+          console.log("Signed In with redirect: ", payload.message)
+          getUser();
+          break;
+        case "signInWithRedirect_failure":
+          setError("An error has occurred during the OAuth flow.");
+          break;
+      }
+    });
+
+    getUser();
+
+    return unsubscribe;
+  }, []);
+
+  const getUser = async (): Promise<void> => {
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      store?.setLoggedInUser(currentUser);
+    } catch (error) {
+      console.error(error);
+      console.log("Not signed in");
+    }
+  };
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // const signInData = await signIn('credentials', {
-    //   email: data.email,
-    //   password: data.password,
-    //   redirect: false
-    // });
     try {
       const { isSignedIn  } = await signIn({
         username: data.email,
