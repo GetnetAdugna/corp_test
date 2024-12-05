@@ -54,7 +54,7 @@ export const Login = () => {
     //   redirect: false
     // });
     try {
-      const { isSignedIn } = await signIn({
+      const { isSignedIn  } = await signIn({
         username: data.email,
         password: data.password,
       })
@@ -71,10 +71,11 @@ export const Login = () => {
         });
       }
     } catch (error) {
+      console.log("Error: ",error)
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your login request.",
+        title: "NotAuthorizedException",
+        description: "Incorrect username or password.",
       })
     }
 

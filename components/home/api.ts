@@ -17,7 +17,7 @@ interface UploadResult {
 }
 
 // Function to upload image to the API directly from the client side
-export async function uploadImageToApiBBBB(imageFile: File): Promise<UploadResult> {
+export async function uploadImageToApi(imageFile: File): Promise<UploadResult> {
   const imageBuffer = await imageFile.arrayBuffer();
   const imageContent = Buffer.from(imageBuffer).toString('base64');
   const payload = { input: { image_file: [imageContent] } };
